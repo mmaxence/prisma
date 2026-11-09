@@ -116,7 +116,7 @@ const time=sample.currentTime;await sleep(200);assert('bundled clip plays',sampl
 assert('source toggle preserves controls',page.querySelector('#amount').value==='63');
 assert('video snippet uses video selector',page.querySelector('#code').textContent.includes("querySelector('video')"));
 page.querySelector('#video-play').click();await sleep(50);assert('video pause control works',sample.paused);
-page.querySelector('#source-image').click();await sleep(150);assert('image toggle restores image',!!page.querySelector('#media[src="assets/alpine.svg"]')&&!page.querySelector('#media video'));
+page.querySelector('#source-image').click();await sleep(150);assert('image toggle restores selected default',!!page.querySelector('#media[src="assets/hero-orbit.jpg"]')&&!page.querySelector('#media video'));
 assert('source switches retain one canvas',page.querySelectorAll('.stage canvas').length===1);
 const uploadImage=await (await fetch('../demo/assets/alpine.svg')).blob();const transfer=new demo.contentWindow.DataTransfer();transfer.items.add(new demo.contentWindow.File([uploadImage],'test.svg',{type:'image/svg+xml'}));page.querySelector('#file').files=transfer.files;page.querySelector('#file').dispatchEvent(new Event('change'));await sleep(150);
 assert('upload remains third source',page.querySelector('#upload').getAttribute('aria-pressed')==='true'&&page.querySelector('#media').src.startsWith('blob:'));

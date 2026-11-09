@@ -97,7 +97,7 @@ function setSource(kind,src,name){
  next.src=src;media.replaceWith(next);media=next;
  document.querySelectorAll('[data-source]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.source===kind)));
  $('#video-play').hidden=!isVideo;$('#video-play').textContent='Play video';
- $('#source-note').textContent=kind==='upload'?label:isVideo?'Original sample · 6-second loop · muted':'Original Alpine illustration';
+ $('#source-note').textContent=kind==='upload'?label:isVideo?'Original sample · 6-second loop · muted':label;
  $('#status').textContent='';setEmbedControls(false);mount();update();
  if(isVideo){
   const sync=()=>$('#video-play').textContent=next.paused?'Play video':'Pause video';
