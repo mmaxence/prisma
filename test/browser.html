@@ -1,5 +1,6 @@
 <!doctype html><style>body{margin:0}.host{width:320px;height:240px;position:relative}.host img,.host video{width:100%;height:100%;object-fit:cover}</style><body><script type="module">
 import {createEffect,noise,retroTv,matrix,vhs,glitch,ascii,thermal,prism,liquid,ripple,fluted,halftone,vortex,dither,pixelate,rgbSplit,glassBreak,duotone,scanlines,zoomIn,zoomOut,vibration,pan,handheld,tiltShift} from '../src/index.js';
+import {heroOptions,cursorTreatment} from '../demo/hero-effects.js';
 const results=[],errors=[];window.onerror=message=>errors.push(String(message));window.onunhandledrejection=e=>errors.push(String(e.reason));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const assert=(name,value,detail)=>{results.push({name,pass:!!value,detail});};
@@ -11,6 +12,15 @@ const difference=(a,b)=>{let n=0;for(let i=0;i<a.length;i+=4)if(Math.abs(a[i]-b[
 let fx=createEffect(img,{effect:prism,trigger:'still',pixelRatio:1,onError:e=>errors.push(e.message)});await sleep(150);
 let invalidThrew=false;try{fx.set({layers:[{}]});}catch{invalidThrew=true;}assert('invalid configuration rejected without breaking renderer',invalidThrew&&!fx.stats.fallback);
 const reference=await pixels(fx,{amount:0});
+const heroStart=await pixels(fx,{...heroOptions,trigger:'still',phase:0});
+const heroAccent=await pixels(fx,{phase:1/32});
+assert('hero composition renders all four layers',!fx.stats.fallback&&difference(heroStart,heroAccent)>.005);
+const heroEnd=await pixels(fx,{phase:1});assert('hero 48-second loop is seamless',difference(heroStart,heroEnd)<.001);
+const cursorOff=await pixels(fx,{layers:[{effect:cursorTreatment,amount:0}]});
+const cursorOn=await pixels(fx,{layers:[{effect:cursorTreatment,amount:1}]});
+assert('hero cursor treatment changes a localized area',difference(cursorOff,cursorOn)>.005&&difference(cursorOff,cursorOn)<.3);
+await pixels(fx,{layers:undefined,effect:prism,trigger:'still',amount:0,phase:0});
+
 for(const effect of [noise,retroTv,matrix,vhs,glitch,ascii,thermal,prism,liquid,ripple,fluted,halftone,vortex,dither,pixelate,rgbSplit,glassBreak,duotone,scanlines,zoomIn,zoomOut,vibration,pan,handheld,tiltShift]){
  const base=await pixels(fx,{effect,amount:0,phase:0});assert(effect.name+' zero strength preserves source',difference(base,reference)<.001);const first=await pixels(fx,{amount:1,phase:0});const second=await pixels(fx,{phase:.25});
  assert(effect.name+' paints',first.some((x,i)=>i%4===3&&x>0));assert(effect.name+' changes media',difference(base,effect.impact?second:first)>.01);assert(effect.name+' animates',difference(first,second)>.005,difference(first,second));
