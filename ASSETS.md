@@ -14,7 +14,7 @@ This review is limited to the files bundled in Prisma. It does not change licens
 
 ## Additional demo media
 
-`coast.jpg`, `drawing.jpg`, and `sculpture.jpg` are original AI-generated sample images created with OpenAI image generation for this project. Prompts are recorded in `demo/assets/PROMPTS.md`.
+`coast.jpg`, `drawing.jpg`, `sculpture.jpg`, and `hero-orbit.jpg` are original AI-generated sample images created with OpenAI image generation for this project. Prompts are recorded in `demo/assets/PROMPTS.md`.
 
 
 ## Materia site effects

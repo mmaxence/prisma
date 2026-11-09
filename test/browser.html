@@ -101,7 +101,7 @@ const demo=document.createElement('iframe');demo.style.cssText='width:900px;heig
 const page=demo.contentDocument;
 page.querySelector('#amount').value='63';page.querySelector('#amount').dispatchEvent(new Event('input'));
 page.querySelector('#source-video').click();await sleep(500);
-const sample=page.querySelector('video');assert('video toggle loads bundled clip',sample?.readyState>=2);
+const sample=page.querySelector('video');for(let wait=0;sample?.readyState<2&&wait<100;wait++)await sleep(50);assert('video toggle loads bundled clip',sample?.readyState>=2);
 const time=sample.currentTime;await sleep(200);assert('bundled clip plays',sample.currentTime>time);
 assert('source toggle preserves controls',page.querySelector('#amount').value==='63');
 assert('video snippet uses video selector',page.querySelector('#code').textContent.includes("querySelector('video')"));
