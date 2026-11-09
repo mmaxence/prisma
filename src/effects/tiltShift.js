@@ -1,0 +1,3 @@
+export default {family:'Motion',name:'tiltShift',title:'Animated tilt-shift',detailLabel:'Focus band',description:'A moving plane of focus with soft, graduated blur above and below the subject.',fragment:`
+vec4 effect(vec2 uv){float focus=0.5+0.14*sin(uPhase); float distance=abs(uv.y-focus); float blur=smoothstep(mix(0.08,0.3,uDetail),mix(0.26,0.48,uDetail),distance)*uAmount*0.022; vec4 color=sampleMedia(uv)*0.2; for(int i=0;i<12;i++){float angle=float(i)*2.39996323;float radius=sqrt((float(i)+0.5)/12.0);vec2 offset=vec2(cos(angle)/uAspect,sin(angle))*radius*blur;color+=sampleMedia(uv+offset)*(0.8/12.0);}return color;}
+`};

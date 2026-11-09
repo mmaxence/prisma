@@ -1,0 +1,141 @@
+<!doctype html><style>body{margin:0}.host{width:320px;height:240px;position:relative}.host img,.host video{width:100%;height:100%;object-fit:cover}</style><body><script type="module">
+import {createEffect,noise,retroTv,matrix,vhs,glitch,ascii,thermal,prism,liquid,ripple,fluted,halftone,vortex,dither,pixelate,rgbSplit,glassBreak,duotone,scanlines,zoomIn,zoomOut,vibration,pan,handheld,tiltShift} from '../src/index.js';
+const results=[],errors=[];window.onerror=message=>errors.push(String(message));window.onunhandledrejection=e=>errors.push(String(e.reason));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const assert=(name,value,detail)=>{results.push({name,pass:!!value,detail});};
+const host=document.body.appendChild(document.createElement('div'));host.className='host';
+const img=host.appendChild(new Image());img.src='../demo/assets/alpine.svg';await img.decode();
+// Read in the same animation frame as draw; non-preserved drawing buffers can clear after presentation.
+async function pixels(fx,settings){fx.set(settings);return new Promise(resolve=>requestAnimationFrame(()=>{const gl=fx.canvas.getContext('webgl2');const data=new Uint8Array(fx.canvas.width*fx.canvas.height*4);gl.readPixels(0,0,fx.canvas.width,fx.canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,data);resolve(data);}));}
+const difference=(a,b)=>{let n=0;for(let i=0;i<a.length;i+=4)if(Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2])>12)n++;return n/(a.length/4);};
+let fx=createEffect(img,{effect:prism,trigger:'still',pixelRatio:1,onError:e=>errors.push(e.message)});await sleep(150);
+let invalidThrew=false;try{fx.set({layers:[{}]});}catch{invalidThrew=true;}assert('invalid configuration rejected without breaking renderer',invalidThrew&&!fx.stats.fallback);
+const reference=await pixels(fx,{amount:0});
+for(const effect of [noise,retroTv,matrix,vhs,glitch,ascii,thermal,prism,liquid,ripple,fluted,halftone,vortex,dither,pixelate,rgbSplit,glassBreak,duotone,scanlines,zoomIn,zoomOut,vibration,pan,handheld,tiltShift]){
+ const base=await pixels(fx,{effect,amount:0,phase:0});assert(effect.name+' zero strength preserves source',difference(base,reference)<.001);const first=await pixels(fx,{amount:1,phase:0});const second=await pixels(fx,{phase:.25});
+ assert(effect.name+' paints',first.some((x,i)=>i%4===3&&x>0));assert(effect.name+' changes media',difference(base,effect.impact?second:first)>.01);assert(effect.name+' animates',difference(first,second)>.005,difference(first,second));
+ const end=await pixels(fx,{phase:1});assert(effect.name+' loop seam',difference(first,end)<.001,difference(first,end));
+}
+// A known flat treatment makes blend arithmetic and alpha independently testable.
+const flat={name:'flat',fragment:'vec4 effect(vec2 uv){return vec4(0.25,0.5,0.75,0.6);}'};
+for(const blendMode of ['multiply','screen','overlay','soft-light','hard-light','difference','exclusion','darken','lighten']){
+ const blended=await pixels(fx,{effect:flat,amount:1,blendMode});
+ assert(blendMode+' preserves alpha',Math.abs(blended[3]-153)<=1);
+ assert(blendMode+' produces finite visible output',blended.some((n,i)=>i%4!==3&&n>0));
+ if(blendMode==='multiply'||blendMode==='screen'){
+  let maxError=0;for(let i=0;i<reference.length;i+=4)for(let c=0;c<3;c++){
+   const base=reference[i+c]/255,b=[.25,.5,.75][c];
+   const expected=255*(blendMode==='multiply'?base*b:1-(1-base)*(1-b));
+   maxError=Math.max(maxError,Math.abs(blended[i+c]-expected));
+  }
+  assert(blendMode+' matches blend arithmetic',maxError<2,maxError);
+ }
+ const zero=await pixels(fx,{effect:retroTv,amount:0});assert(blendMode+' zero intensity preserves media',difference(zero,reference)<.001);
+}
+const normal=await pixels(fx,{effect:flat,amount:1,blendMode:'normal'});
+const unknown=await pixels(fx,{blendMode:'unknown'});assert('unknown blend falls back to normal',difference(normal,unknown)===0);
+await pixels(fx,{blendMode:'normal'});
+const dim={name:'dim',fragment:'vec4 effect(vec2 uv){vec4 c=sampleMedia(uv);return vec4(c.rgb*0.5,c.a);}'};
+const lift={name:'lift',fragment:'vec4 effect(vec2 uv){vec4 c=sampleMedia(uv);return vec4(c.rgb+0.2,c.a);}'};
+const ordered=await pixels(fx,{layers:[{effect:dim},{effect:lift}],amount:1});
+let stackError=0;for(let i=0;i<reference.length;i+=4)for(let c=0;c<3;c++)stackError=Math.max(stackError,Math.abs(ordered[i+c]-(reference[i+c]*.5+51)));
+assert('stack feeds each pass into the next',stackError<3,stackError);
+fx.preview({effect:dim,amount:1});const temporary=await pixels(fx,{});assert('temporary preview changes rendered stack',difference(temporary,ordered)>.5);
+fx.preview(null);const restoredPreview=await pixels(fx,{});assert('clearing preview restores exact stack',difference(restoredPreview,ordered)===0);const warmPrograms=fx.stats.programs;fx.preview({effect:dim});await pixels(fx,{});fx.preview(null);await pixels(fx,{});assert('repeated preview reuses cached programs',fx.stats.programs===warmPrograms);
+const reversed=await pixels(fx,{layers:[{effect:lift},{effect:dim}]});assert('layer order changes output',difference(ordered,reversed)>.8);
+const bypass=await pixels(fx,{layers:[{effect:dim,enabled:false},{effect:lift,enabled:false}]});assert('bypassed stack shows original',difference(bypass,reference)<.001);
+const empty=await pixels(fx,{layers:[]});assert('empty stack shows original',difference(empty,reference)<.001);
+const repeated=await pixels(fx,{layers:[{effect:dim},{effect:dim},{effect:dim}]});
+let repeatError=0;for(let i=0;i<reference.length;i+=4)for(let c=0;c<3;c++)repeatError=Math.max(repeatError,Math.abs(repeated[i+c]-reference[i+c]/8));assert('repeated modules compose correctly',repeatError<3,repeatError);
+await pixels(fx,{layers:[],trigger:'loop'});await sleep(100);const emptyFrames=fx.stats.frames;await sleep(120);assert('empty composition sleeps',fx.stats.frames===emptyFrames&&!fx.stats.active);
+assert('single pass releases intermediate textures',fx.stats.intermediateTextures===0);
+await pixels(fx,{layers:undefined,trigger:'still'});
+const intact=await pixels(fx,{effect:glassBreak,trigger:'still',amount:1,phase:0});
+const shattered=await pixels(fx,{phase:.25});
+const holes=data=>data.filter((_,i)=>i%4===3).reduce((n,a)=>n+(a<20),0)/(data.length/4);
+assert('glass is intact before impact',holes(intact)<.01,holes(intact));
+assert('cracked glass retains full coverage',holes(shattered)<.01,holes(shattered));
+assert('fractures remain localized',difference(intact,shattered)>.001&&difference(intact,shattered)<.25,difference(intact,shattered));
+fx.set({trigger:'click',duration:.2});fx.trigger();await sleep(450);fx.pause();
+const held=await pixels(fx,{});await sleep(100);const heldAgain=await pixels(fx,{});
+assert('cracks persist after impact without missing media',holes(held)<.01&&difference(held,reference)>.001);
+assert('pause preserves fracture pattern',difference(held,heldAgain)<.001);
+fx.reset();const reset=await pixels(fx,{});assert('reset restores intact media',holes(reset)<.01&&difference(reset,reference)<.001);fx.play();
+const grainBase=await pixels(fx,{effect:noise,trigger:'still',amount:0,phase:0,detail:0});
+const grainA=await pixels(fx,{amount:1,phase:10/240});const grainB=await pixels(fx,{phase:11/240});
+let dot=0,aa=0,bb=0;for(let i=0;i<grainA.length;i+=4){const a=grainA[i]-grainBase[i],b=grainB[i]-grainBase[i];dot+=a*b;aa+=a*a;bb+=b*b;}
+const correlation=dot/Math.sqrt(aa*bb);assert('grain refreshes independently each step',Math.abs(correlation)<.2,correlation);
+for(const effect of [noise,retroTv,matrix,vhs,glitch,ascii,thermal,dither,pixelate,rgbSplit,glassBreak,duotone,scanlines,zoomIn,zoomOut,vibration,pan,handheld,tiltShift]){
+ for(const trigger of ['loop','hover','click','scroll']){
+  fx.set({effect,trigger,amount:1,duration:1});
+  if(trigger==='hover')host.dispatchEvent(new PointerEvent('pointerenter'));
+  if(trigger==='click')host.dispatchEvent(new MouseEvent('click'));
+  if(trigger==='scroll')window.dispatchEvent(new Event('scroll'));
+  await sleep(effect.impact?400:110);const frame=await pixels(fx,{});
+  let change=difference(frame,reference);
+  // Impact loops deliberately return to intact glass at the seam. Sample
+  // a second point so a valid reset frame cannot fail the motion check.
+  if((effect.impact||effect.family==='Motion')&&trigger==='loop'){await sleep(250);change=Math.max(change,difference(await pixels(fx,{}),reference));}
+  assert(effect.name+' '+trigger+' applies treatment',change>.001,change);
+ }
+}
+fx.set({trigger:'still'});
+for(const effect of [noise,retroTv,matrix,vhs,glitch,ascii,thermal,dither,pixelate,rgbSplit,glassBreak,halftone,duotone,scanlines,liquid,ripple,zoomIn,zoomOut,vibration,pan,handheld,tiltShift]){
+ const low=await pixels(fx,{effect,trigger:'still',amount:1,detail:0,phase:.25});const high=await pixels(fx,{detail:1});
+ assert(effect.name+' detail changes treatment',difference(low,high)>.005,difference(low,high));
+}
+await sleep(100);const stillFrames=fx.stats.frames;await sleep(120);assert('still sleeps',fx.stats.frames===stillFrames);
+fx.set({effect:prism,trigger:'loop'});await sleep(200);assert('loop advances',fx.stats.frames>stillFrames+2);
+fx.pause();await sleep(100);const paused=fx.stats.frames;await sleep(100);assert('pause sleeps',fx.stats.frames===paused);fx.play();
+fx.set({trigger:'hover'});host.dispatchEvent(new PointerEvent('pointerenter'));await sleep(120);const hover=fx.stats.frames;await sleep(120);assert('hover animates',fx.stats.frames>hover);
+fx.set({trigger:'click',duration:.2});fx.trigger();await sleep(120);const clicked=fx.stats.frames;await sleep(120);assert('click animates',fx.stats.frames>clicked);await sleep(650);assert('click settles',!fx.stats.active);
+fx.set({trigger:'loop'});host.style.marginTop='20000px';await sleep(150);const hidden=fx.stats.frames;await sleep(100);assert('offscreen sleeps',fx.stats.frames===hidden);host.style.marginTop='0px';await sleep(180);assert('visible resumes',fx.stats.frames>hidden);
+host.style.width='200px';await sleep(100);assert('resize updates canvas',fx.stats.width===200,fx.stats);
+fx.set({layers:[{effect:noise},{effect:duotone}]});await sleep(100);
+const gl=fx.canvas.getContext('webgl2'),ext=gl.getExtension('WEBGL_lose_context');ext.loseContext();await sleep(100);assert('context loss shows native source',fx.canvas.style.opacity==='0');ext.restoreContext();await sleep(250);assert('context restored',fx.canvas.style.opacity==='1');
+fx.destroy();fx.destroy();assert('destroy removes canvas',!host.querySelector('canvas'));assert('destroy restores position',host.style.position==='');
+// Exercise actual video decoding and texture updates with a generated local clip.
+const video=document.createElement('video');video.muted=true;video.loop=true;video.src='motion.webm';img.replaceWith(video);await new Promise((resolve,reject)=>{video.onloadeddata=resolve;video.onerror=reject;});await video.play();fx=createEffect(video,{effect:liquid,trigger:'still',pixelRatio:1});await sleep(200);for(const effect of [noise,retroTv,matrix,vhs,glitch,ascii,thermal,liquid,dither,pixelate,rgbSplit,glassBreak,duotone,scanlines,zoomIn,zoomOut,vibration,pan,handheld,tiltShift]){const a=await pixels(fx,{effect,amount:.8});await sleep(150);const b=await pixels(fx,{amount:.8});assert(effect.name+' video texture changes',difference(a,b)>.01,difference(a,b));}const stackVideoA=await pixels(fx,{layers:[{effect:duotone},{effect:noise}]});await sleep(150);const stackVideoB=await pixels(fx,{});assert('video stack updates decoded frames',difference(stackVideoA,stackVideoB)>.01);video.pause();fx.destroy();
+const broken={...prism,fragment:'not valid glsl'};fx=createEffect(video,{effect:broken,onError:()=>{}});assert('shader failure retains native media',fx.stats.fallback&&fx.canvas.style.opacity==='0');fx.set({effect:noise,trigger:'still'});await sleep(150);assert('valid effect recovers shader failure',!fx.stats.fallback&&fx.canvas.style.opacity==='1');fx.destroy();
+const demo=document.createElement('iframe');demo.style.cssText='width:900px;height:900px;border:0';demo.src='../demo/index.html';host.replaceWith(demo);await new Promise(resolve=>demo.onload=resolve);await sleep(600);
+const page=demo.contentDocument;
+page.querySelector('#amount').value='63';page.querySelector('#amount').dispatchEvent(new Event('input'));
+page.querySelector('#source-video').click();await sleep(500);
+const sample=page.querySelector('video');assert('video toggle loads bundled clip',sample?.readyState>=2);
+const time=sample.currentTime;await sleep(200);assert('bundled clip plays',sample.currentTime>time);
+assert('source toggle preserves controls',page.querySelector('#amount').value==='63');
+assert('video snippet uses video selector',page.querySelector('#code').textContent.includes("querySelector('video')"));
+page.querySelector('#video-play').click();await sleep(50);assert('video pause control works',sample.paused);
+page.querySelector('#source-image').click();await sleep(150);assert('image toggle restores image',!!page.querySelector('#media[src="assets/alpine.svg"]')&&!page.querySelector('#media video'));
+assert('source switches retain one canvas',page.querySelectorAll('.stage canvas').length===1);
+const uploadImage=await (await fetch('../demo/assets/alpine.svg')).blob();const transfer=new demo.contentWindow.DataTransfer();transfer.items.add(new demo.contentWindow.File([uploadImage],'test.svg',{type:'image/svg+xml'}));page.querySelector('#file').files=transfer.files;page.querySelector('#file').dispatchEvent(new Event('change'));await sleep(150);
+assert('upload remains third source',page.querySelector('#upload').getAttribute('aria-pressed')==='true'&&page.querySelector('#media').src.startsWith('blob:'));
+assert('catalog exposes all 25 effects',page.querySelectorAll('.effect').length===25);
+const previewCard=page.querySelector('[aria-label="Add Film noise"]'),savedCode=page.querySelector('#code').textContent;
+previewCard.dispatchEvent(new demo.contentWindow.PointerEvent('pointerenter',{pointerType:'mouse'}));
+assert('hover previews without committing a layer',previewCard.classList.contains('previewing')&&page.querySelectorAll('.layer-row').length===1&&page.querySelector('#code').textContent===savedCode);
+previewCard.dispatchEvent(new demo.contentWindow.PointerEvent('pointerleave',{pointerType:'mouse'}));
+assert('pointer leave clears preview',!previewCard.classList.contains('previewing')&&!page.querySelector('#effect-label').textContent.includes('PREVIEW'));
+previewCard.dispatchEvent(new demo.contentWindow.PointerEvent('pointerenter',{pointerType:'mouse'}));
+page.querySelector('[aria-label="Add Film noise"]').click();
+assert('adding layer selects its inspector',page.querySelectorAll('.layer-row').length===2&&page.querySelector('#title').textContent==='Film noise');
+page.querySelector('#amount').value='27';page.querySelector('#amount').dispatchEvent(new Event('input'));
+page.querySelector('[aria-label="Move up Film noise"]').click();
+assert('reorder retains layer settings',page.querySelector('.layer-select').textContent.includes('Film noise')&&page.querySelector('#amount').value==='27');
+page.querySelector('[aria-label="Bypass Film noise"]').click();
+assert('bypass updates exported composition',page.querySelector('#code').textContent.includes('enabled: false'));
+page.querySelector('[aria-label="Remove Film noise"]').click();
+assert('remove preserves other layer',page.querySelectorAll('.layer-row').length===1&&page.querySelector('#amount').value==='63');
+page.querySelector('#undo').click();assert('undo restores removed layer',page.querySelectorAll('.layer-row').length===2);
+page.querySelector('#redo').click();assert('redo removes layer again',page.querySelectorAll('.layer-row').length===1);
+const stableRow=page.querySelector('.layer-select');stableRow.focus();page.querySelector('#amount').dispatchEvent(new Event('input'));assert('parameter edit retains layer DOM and focus',stableRow===page.querySelector('.layer-select')&&page.activeElement===stableRow);
+page.querySelector('[aria-label="Remove Retro TV"]').click();
+assert('empty stack opens catalog',page.querySelectorAll('.layer-row').length===0&&page.querySelector('.catalog').open);
+page.querySelector('#effect-search').value='glass';page.querySelector('#effect-search').dispatchEvent(new Event('input'));
+assert('catalog search narrows choices',page.querySelectorAll('.effect:not([hidden])').length===2);
+page.querySelector('[aria-label="Add Fluted glass"]').click();await sleep(100);
+assert('empty stack can restart',page.querySelectorAll('.layer-row').length===1&&page.querySelectorAll('.stage canvas').length===1);
+demo.remove();
+assert('no unexpected errors',errors.length===0,errors);
+await fetch('/__result',{method:'POST',body:JSON.stringify({results,errors,userAgent:navigator.userAgent})});
+</script>

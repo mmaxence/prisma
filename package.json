@@ -1,0 +1,40 @@
+{
+  "name": "@prisma-fx/media",
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "description": "Small print, signal, color, and surface shaders for living images and video",
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./core": {
+      "types": "./src/core.d.ts",
+      "import": "./src/core.js"
+    },
+    "./effects/*": {
+      "types": "./src/effects/*.d.ts",
+      "import": "./src/effects/*.js"
+    }
+  },
+  "files": [
+    "src",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "ASSETS.md"
+  ],
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "test": "node scripts/check.mjs && node scripts/check.mjs reduced",
+    "size": "node scripts/size.mjs",
+    "build:site": "node scripts/build-site.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmaxence/prisma.git"
+  },
+  "homepage": "https://mmaxence.github.io/prisma/"
+}

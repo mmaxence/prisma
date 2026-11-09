@@ -1,0 +1,19 @@
+<!doctype html><style>body{margin:0;font:14px monospace}.host{width:960px;height:640px;position:relative}img{width:100%;height:100%;object-fit:cover}pre{white-space:pre-wrap}</style><div class="host"><img src="../demo/assets/alpine.svg" alt="Benchmark source"></div><pre>Measuring 120 frames per size…</pre><script type="module">
+import {createEffect,matrix,retroTv,vhs,glitch,ascii,thermal,fluted,glassBreak,dither,rgbSplit} from '../src/index.js';
+const effects={matrix,retroTv,vhs,glitch,ascii,thermal,fluted,glassBreak,dither,rgbSplit};
+const effect=effects[new URLSearchParams(location.search).get('effect')]||fluted;
+const image=document.querySelector('img');await image.decode();const host=image.parentElement;
+const fx=createEffect(image,{effect,pixelRatio:1.5});
+const frame=()=>new Promise(r=>requestAnimationFrame(r));const runs=[];
+for(const [width,height] of [[960,640],[390,480]]){
+ host.style.width=width+'px';host.style.height=height+'px';for(let n=0;n<20;n++)await frame();
+ let last=await frame();const intervals=[],cpu=[];
+ for(let i=0;i<120;i++){const now=await frame();intervals.push(now-last);last=now;cpu.push(fx.stats.cpuMs);}
+ const quantile=(data,p)=>data.sort((a,b)=>a-b)[Math.floor((data.length-1)*p)];
+ runs.push({cssWidth:width,cssHeight:height,pixelRatio:1.5,backingWidth:fx.stats.width,backingHeight:fx.stats.height,rafP50:quantile(intervals,.5),rafP95:quantile(intervals,.95),cpuSubmissionP50:quantile(cpu,.5),cpuSubmissionP95:quantile(cpu,.95)});
+}
+const gl=fx.canvas.getContext('webgl2'),debug=gl.getExtension('WEBGL_debug_renderer_info');
+const report={effect:effect.name,userAgent:navigator.userAgent,renderer:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'unknown',note:'Desktop browser only. RAF intervals and CPU submission time are not GPU timings or mobile-device measurements.',runs};
+fx.destroy();document.querySelector('pre').textContent=JSON.stringify(report,null,2);
+fetch('/__result',{method:'POST',body:JSON.stringify(report)}).catch(()=>{});
+</script>

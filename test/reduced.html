@@ -1,0 +1,10 @@
+<!doctype html><style>#host{width:320px;height:240px}img{width:100%;height:100%;object-fit:cover}</style><div id="host"><img src="../demo/assets/alpine.svg" alt="Test"></div><script type="module">
+import {createEffect,prism} from '../src/index.js';
+const results=[],assert=(name,pass)=>results.push({name,pass}),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const img=document.querySelector('img');await img.decode();const fx=createEffect(img,{effect:prism,trigger:'loop'});await sleep(200);
+assert('reduced motion preference active',matchMedia('(prefers-reduced-motion: reduce)').matches);
+assert('reduced motion paints',fx.stats.frames>0);const frames=fx.stats.frames;await sleep(250);assert('reduced motion stops RAF',fx.stats.frames===frames&&!fx.stats.active);
+fx.set({amount:.2});await sleep(100);assert('reduced motion permits static updates',fx.stats.frames>frames);
+fx.destroy();assert('cleanup restores native opacity',img.style.opacity==='');
+await fetch('/__result',{method:'POST',body:JSON.stringify({results})});
+</script>
