@@ -1,6 +1,6 @@
 import './vendor/materia/brand.js';
 import {createEffect} from '../src/index.js';
-import {heroOptions,cursorTreatment} from './hero-effects.js';
+import {heroOptions,cursorTreatment} from './hero-effects.js?v=full-frame';
 const media=document.querySelector('.hero-media img');
 const button=document.querySelector('#showcase-motion');
 let fx,hoverFrame=0,hoverAmount=0,hoverTarget=0,previous=0;

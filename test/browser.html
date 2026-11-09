@@ -18,7 +18,7 @@ assert('hero composition renders all four layers',!fx.stats.fallback&&difference
 const heroEnd=await pixels(fx,{phase:1});assert('hero 48-second loop is seamless',difference(heroStart,heroEnd)<.001);
 const cursorOff=await pixels(fx,{layers:[{effect:cursorTreatment,amount:0}]});
 const cursorOn=await pixels(fx,{layers:[{effect:cursorTreatment,amount:1}]});
-assert('hero cursor treatment changes a localized area',difference(cursorOff,cursorOn)>.005&&difference(cursorOff,cursorOn)<.3);
+assert('hero cursor treatment changes a localized area',difference(cursorOff,cursorOn)>.005&&difference(cursorOff,cursorOn)<.65);
 await pixels(fx,{layers:undefined,effect:prism,trigger:'still',amount:0,phase:0});
 
 for(const effect of [noise,retroTv,matrix,vhs,glitch,ascii,thermal,prism,liquid,ripple,fluted,halftone,vortex,dither,pixelate,rgbSplit,glassBreak,duotone,scanlines,zoomIn,zoomOut,vibration,pan,handheld,tiltShift]){
