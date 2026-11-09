@@ -1,0 +1,16 @@
+# Prisma
+
+> Dependency-free WebGL2 effects for native images and videos. This is the media-effects project by Maxence Mauduit, not the Prisma database ORM.
+
+Version 0.1.0-alpha.1. MIT library; sample assets have separate notices. Not published to npm. Use source ES modules; pin a commit and self-host for production. Browser mounting requires WebGL2; retain native media as fallback.
+
+## Start here
+- [Integration guide](https://mmaxence.github.io/prisma/agent-guide.md): installation, working example, lifecycle and constraints.
+- [Documentation](https://mmaxence.github.io/prisma/documentation/index.html): full API, effects, triggers and accessibility.
+- [Effect catalog JSON](https://mmaxence.github.io/prisma/effects.json): exported names and module URLs generated from source exports.
+- [TypeScript API](https://mmaxence.github.io/prisma/src/index.d.ts): public type declarations.
+- [Core API types](https://mmaxence.github.io/prisma/src/core.d.ts): controller and option types.
+- [Effect authoring contract](https://mmaxence.github.io/prisma/docs/SKILL.md): extending the library.
+- [Performance](https://mmaxence.github.io/prisma/performance/index.html): measurements, method and caveats.
+- [Asset notices](https://mmaxence.github.io/prisma/ASSETS.md): media rights and attribution.
+- [Source](https://github.com/mmaxence/prisma): releases, development and issue reporting.
