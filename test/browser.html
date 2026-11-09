@@ -86,6 +86,8 @@ for(const effect of [noise,retroTv,matrix,vhs,glitch,ascii,thermal,dither,pixela
   // Impact loops deliberately return to intact glass at the seam. Sample
   // a second point so a valid reset frame cannot fail the motion check.
   if((effect.impact||effect.family==='Motion')&&trigger==='loop'){await sleep(250);change=Math.max(change,difference(await pixels(fx,{}),reference));}
+  // Glitch has deliberate quiet intervals; sample a second point in the interaction.
+  if(effect===glitch){await sleep(180);change=Math.max(change,difference(await pixels(fx,{}),reference));}
   assert(effect.name+' '+trigger+' applies treatment',change>.001,change);
  }
 }
