@@ -25,7 +25,7 @@ host.addEventListener('pointerenter',event=>{if(event.pointerType!=='touch')setH
 host.addEventListener('pointerleave',()=>setHover(0));
 host.addEventListener('pointercancel',()=>setHover(0));
 window.addEventListener('blur',()=>setHover(0));
-function mount(){if(fx)return;fx=createEffect(media,{...heroOptions,layers:layers()});if(button.getAttribute('aria-pressed')==='true')fx.pause();}
+function mount(){if(fx)return;fx=createEffect(media,{...heroOptions,layers:layers()});if(button.getAttribute('aria-pressed')==='true'||media.parentElement.classList.contains('show-original'))fx.pause();}
 button.addEventListener('click',()=>{const paused=button.getAttribute('aria-pressed')!=='true';button.setAttribute('aria-pressed',String(paused));button.setAttribute('aria-label',paused?'Resume hero motion':'Pause hero motion');button.title=button.getAttribute('aria-label');button.textContent=paused?'▷':'Ⅱ';if(paused)fx?.pause();else if(!media.parentElement.classList.contains('show-original'))fx?.play();});
 mount();
 window.addEventListener('pagehide',()=>{cancelAnimationFrame(hoverFrame);hoverFrame=0;hoverAmount=hoverTarget=0;fx?.destroy();fx=undefined;});

@@ -55,7 +55,7 @@ export function createEffect(media, options = {}) {
  const passthrough={name:'original',fragment:'vec4 effect(vec2 uv){return sampleMedia(uv);}'};
  let cache=new Map(),targets=[],targetSize='',previewLayer=null;
  let config = {...options}, gl, program, texture, uniforms, raf=0, disposed=false, failed=false, visible=true, paused=false;
- let impactProgress=0, phase=0, strength=0, target=0, last=0, dirty=true, uploaded=false, lastVideoTime=-1, clickStart=-1, lost=false;
+ let impactProgress=0, phase=0, strength=0, target=0, last=0, dirty=true, uploaded=false, lastVideoTime=-1, sourceWidth=0, sourceHeight=0, textureUploads=0, sourceTextureAllocations=0, clickStart=-1, lost=false;
  let impact=[0.5,0.5],pointer=[0.5,0.5], frames=0, cpuMs=0;
  const listeners=[];
  const on=(el,name,fn)=>{el.addEventListener(name,fn);listeners.push(()=>el.removeEventListener(name,fn));};
@@ -80,10 +80,10 @@ export function createEffect(media, options = {}) {
   for(const t of targets){gl.deleteTexture(t.texture);gl.deleteFramebuffer(t.framebuffer);}
   targets=[];targetSize='';
  }
- function allocateTargets(width,height){
+ function allocateTargets(width,height,count){
   releaseTargets();
   try{
-   for(let i=0;i<2;i++){
+   for(let i=0;i<count;i++){
     const t={texture:gl.createTexture(),framebuffer:gl.createFramebuffer()};targets.push(t);
     gl.bindTexture(gl.TEXTURE_2D,t.texture);
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,width,height,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
@@ -93,7 +93,7 @@ export function createEffect(media, options = {}) {
     gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t.texture,0);
     if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('Unable to allocate effect stack');
    }
-   targetSize=width+'x'+height;
+   targetSize=width+'x'+height+'x'+count;
   }catch(error){releaseTargets();throw error;}
   finally{gl.bindFramebuffer(gl.FRAMEBUFFER,null);}
  }
@@ -104,7 +104,7 @@ export function createEffect(media, options = {}) {
   makeProgram(layers()[0]?.effect||passthrough);texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);uploaded=false;dirty=true;failed=false;
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);uploaded=false;sourceWidth=0;sourceHeight=0;dirty=true;failed=false;
  }
  function wake(){dirty=true;if(!raf&&!disposed&&!failed&&!lost&&visible&&!document.hidden)raf=requestAnimationFrame(draw);}
  function draw(now){
@@ -122,14 +122,22 @@ export function createEffect(media, options = {}) {
   if(m==='click')target=clickStart<0?0:Math.sin(Math.PI*clamp((now-clickStart)/(duration*1000),0,1));
   if(reduced){strength=target;phase=0;}else if(!paused){strength+=(target-strength)*(1-Math.exp(-dt*12));if(m==='loop'||m==='hover'||m==='click')phase=(phase+dt/duration*TAU)%TAU;if(m==='scroll')phase=target*TAU;}
   if(m==='still'){phase=number(config.phase,0,0,1)*TAU;strength=1;}
-  const videoChanged=video&&media.currentTime!==lastVideoTime;
+  const videoTime=video?(media.currentTime):0;
+  const videoChanged=video&&videoTime!==lastVideoTime;
+  const active=layers();if(previewLayer)active.push(previewLayer);
+  const hasLayers=active.length>0;
   if(dirty||!uploaded||videoChanged||(!paused&&!reduced&&m!=='still')){
    try {
     gl.useProgram(program);gl.bindTexture(gl.TEXTURE_2D,texture);
-    if(!uploaded||videoChanged){gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,media);uploaded=true;lastVideoTime=media.currentTime;}
-    const active=layers();if(previewLayer)active.push(previewLayer);if(!active.length)active.push({effect:passthrough,amount:0});
+    if(!uploaded||videoChanged){
+     if(sourceWidth!==mw||sourceHeight!==mh){gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,media);sourceWidth=mw;sourceHeight=mh;sourceTextureAllocations++;}
+     else gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,gl.RGBA,gl.UNSIGNED_BYTE,media);
+     textureUploads++;uploaded=true;lastVideoTime=videoTime;
+    }
+    if(!active.length)active.push({effect:passthrough,amount:0});
 
-    if(active.length>1&&targetSize!==width+'x'+height)allocateTargets(width,height);
+    const targetCount=Math.min(2,active.length-1);
+    if(targetCount&&targetSize!==width+'x'+height+'x'+targetCount)allocateTargets(width,height,targetCount);
     if(active.length===1&&!previewLayer&&targets.length)releaseTargets();
     const hasImpact=active.some(l=>l!==previewLayer&&l.effect.impact);
     if(!paused)impactProgress=hasImpact?(m==='click'?(clickStart<0?0:clamp((now-clickStart)/(duration*1000),0,1)):(0.5-0.5*Math.cos(phase))*(m==='hover'?strength:1)):0;
@@ -146,7 +154,7 @@ export function createEffect(media, options = {}) {
    }catch(error){report(error);return;}
   }
   cpuMs=performance.now()-start;
-  const moving=(layers().length>0||previewLayer)&&!paused&&!reduced&&(m==='loop'||(m==='hover'&&(target>0||strength>0.001))||(m==='click'&&clickStart>=0&&now-clickStart<duration*1000+500));
+  const moving=hasLayers&&!paused&&!reduced&&(m==='loop'||(m==='hover'&&(target>0||strength>0.001))||(m==='click'&&clickStart>=0&&now-clickStart<duration*1000+500));
   if(moving||(video&&!media.paused&&!media.ended))raf=requestAnimationFrame(draw);
  }
  on(host,'pointermove',e=>{const r=host.getBoundingClientRect();pointer=[clamp((e.clientX-r.left)/r.width,0,1),1-clamp((e.clientY-r.top)/r.height,0,1)];if(mode()!=='still'&&layers().some(l=>!l.effect.impact))wake();});
@@ -161,7 +169,8 @@ export function createEffect(media, options = {}) {
  on(document,'visibilitychange',()=>{last=0;if(document.hidden){cancelAnimationFrame(raf);raf=0;}else wake();});
  on(motion,'change',wake);
  on(media,video?'loadeddata':'load',()=>{uploaded=false;wake();});
- if(video)for(const event of ['play','pause','seeked','timeupdate'])on(media,event,wake);
+ if(video)on(media,'seeked',()=>{uploaded=false;wake();});
+ if(video)for(const event of ['play','pause','timeupdate'])on(media,event,wake);
  on(canvas,'webglcontextlost',e=>{e.preventDefault();lost=true;cancelAnimationFrame(raf);raf=0;canvas.style.opacity='0';media.style.opacity=previousOpacity;});
  on(canvas,'webglcontextrestored',()=>{lost=false;program=null;try{init();wake();}catch(error){report(error);}});
  const resize=new ResizeObserver(wake);resize.observe(host);
@@ -173,7 +182,7 @@ export function createEffect(media, options = {}) {
   reset(){config.phase=0;impactProgress=0;clickStart=-1;phase=0;strength=0;last=0;wake();},
   set(next){if(disposed)return;validate({...config,...next});const old=config.effect,oldTrigger=config.trigger;config={...config,...next};if(next.trigger&&next.trigger!==oldTrigger){target=0;strength=0;clickStart=-1;}try{if(failed&&gl&&!lost){failed=false;uploaded=false;if(!texture)init();else makeProgram(layers()[0]?.effect||passthrough);}else if(next.effect&&next.effect!==old&&!config.layers&&!lost)makeProgram(next.effect);wake();}catch(error){report(error);}},
   pause(){paused=true;wake();},play(){paused=false;last=0;wake();},trigger,
-  get stats(){return {frames,cpuMs,width:canvas.width,height:canvas.height,active:!!raf,fallback:failed||lost,programs:cache.size,intermediateTextures:targets.length};},
+  get stats(){return {frames,cpuMs,width:canvas.width,height:canvas.height,active:!!raf,fallback:failed||lost,programs:cache.size,intermediateTextures:targets.length,textureUploads,sourceTextureAllocations};},
   destroy(){if(disposed)return;disposed=true;cancelAnimationFrame(raf);resize.disconnect();intersection.disconnect();listeners.forEach(fn=>fn());if(gl){gl.deleteTexture(texture);for(const item of cache.values())gl.deleteProgram(item.program);releaseTargets();cache.clear();}canvas.remove();media.style.opacity=previousOpacity;host.style.position=previousPosition;}
  };
 }

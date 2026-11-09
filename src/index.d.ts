@@ -2,7 +2,7 @@ export interface Effect { name: string; title: string; description: string; frag
 export type BlendMode = 'normal' | 'multiply' | 'screen' | 'overlay' | 'soft-light' | 'hard-light' | 'difference' | 'exclusion' | 'darken' | 'lighten';
 export interface Layer { effect: Effect; amount?: number; detail?: number; blendMode?: BlendMode; enabled?: boolean }
 export interface Options { effect?: Effect; layers?: Layer[]; blendMode?: BlendMode; trigger?: 'loop' | 'hover' | 'click' | 'scroll' | 'still'; amount?: number; detail?: number; duration?: number; phase?: number; pixelRatio?: number; onError?: (error: Error) => void }
-export interface Controller { canvas: HTMLCanvasElement; preview(layer?: Layer | null): void; set(options: Partial<Options>): void; pause(): void; play(): void; trigger(): void; reset(): void; destroy(): void; readonly stats: { frames: number; cpuMs: number; width: number; height: number; active: boolean; fallback: boolean; programs: number; intermediateTextures: number } }
+export interface Controller { canvas: HTMLCanvasElement; preview(layer?: Layer | null): void; set(options: Partial<Options>): void; pause(): void; play(): void; trigger(): void; reset(): void; destroy(): void; readonly stats: { frames: number; cpuMs: number; width: number; height: number; active: boolean; fallback: boolean; programs: number; intermediateTextures: number; textureUploads: number; sourceTextureAllocations: number } }
 export function createEffect(media: HTMLImageElement | HTMLVideoElement, options: Options): Controller;
 export const prism: Effect;
 export const liquid: Effect;

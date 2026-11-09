@@ -11,7 +11,7 @@ function checkpoint(){
  if(history[historyIndex]){const previous=JSON.parse(history[historyIndex]),current=JSON.parse(state);previous.activeLayer=current.activeLayer;if(JSON.stringify(previous)===state)return;}
  history.splice(historyIndex+1);history.push(state);if(history.length>50)history.shift();historyIndex=history.length-1;syncHistory();
 }
-function syncHistory(){const embedded=media.tagName==='IFRAME';$('#undo').disabled=embedded||historyIndex<=0;$('#redo').disabled=embedded||historyIndex>=history.length-1;}
+function syncHistory(){$('#undo').disabled=historyIndex<=0;$('#redo').disabled=historyIndex>=history.length-1;}
 function restoreHistory(direction){
  if(historyIndex+direction<0||historyIndex+direction>=history.length)return;
  endPreview();historyIndex+=direction;const state=JSON.parse(history[historyIndex]);restoring=true;
@@ -36,7 +36,7 @@ function startPreview(button,effect){
 $('.catalog').addEventListener('toggle',()=>{if(!$('.catalog').open)endPreview();});
 window.addEventListener('blur',endPreview);
 function release(){endPreview();if(!handle)return;const gl=handle.canvas.getContext('webgl2');handle.destroy();gl?.getExtension('WEBGL_lose_context')?.loseContext();handle=null;}
-function mount(){release();if(media.tagName==='IFRAME')return;handle=createEffect(media,settings());paused=false;$('#pause').textContent='Pause motion';}
+function mount(){release();handle=createEffect(media,settings());paused=false;$('#pause').textContent='Pause motion';}
 function update(event){endPreview();if(stack[activeLayer])Object.assign(stack[activeLayer],{amount:$('#amount').value/100,detail:$('#detail').value/100,blendMode:$('#blend-mode').value});handle?.set(settings());renderLayers();$('#amount-value').textContent=$('#amount').value+'%';$('#duration-value').textContent=$('#duration').value+'s';$('#phase-value').textContent=$('#phase').value+'%';$('#detail-value').textContent=$('#detail').value+'%';$('#detail-name').textContent=selected.detailLabel||'Detail';$('#phase').disabled=$('#trigger').value!=='still';$('#hint').textContent={loop:'A seamless loop. Try another treatment.',hover:'Hover or focus to wake the effect.',click:'Click, tap, or press Enter.',scroll:'Scroll the page to move the effect.',still:'A moment, held in place.'}[$('#trigger').value];const imports=[...new Set(stack.map(l=>l.effect.name))];$('#code').textContent=`import { createEffect${imports.length?', '+imports.join(', '):''} } from 'https://mmaxence.github.io/prisma/src/index.js';\n\nconst fx = createEffect(document.querySelector('${media.tagName==='VIDEO'?'video':'img'}'), {\n  layers: [\n${stack.map(l=>`    { effect: ${l.effect.name}, amount: ${l.amount}, detail: ${l.detail}, blendMode: '${l.blendMode}', enabled: ${l.enabled} }`).join(',\n')}\n  ],\n  trigger: '${$('#trigger').value}',\n  duration: ${$('#duration').value},\n  phase: ${$('#phase').value/100}\n});\n\n// On unmount\nfx.destroy();`;if(!(event instanceof Event&&event.type==='input'))checkpoint();syncHistory();}
 function selectLayer(index){
  activeLayer=index;const layer=stack[index];$('.catalog').open=false;$('.inspector').open=true;
@@ -98,7 +98,7 @@ function setSource(kind,src,name){
  document.querySelectorAll('[data-source]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.source===kind)));
  $('#video-play').hidden=!isVideo;$('#video-play').textContent='Play video';
  $('#source-note').textContent=kind==='upload'?label:isVideo?'Original sample · 6-second loop · muted':label;
- $('#status').textContent='';setEmbedControls(false);mount();update();
+ $('#status').textContent='';layerSignature='';mount();update();
  if(isVideo){
   const sync=()=>$('#video-play').textContent=next.paused?'Play video':'Pause video';
   next.addEventListener('play',sync);next.addEventListener('pause',sync);
@@ -108,9 +108,7 @@ function setSource(kind,src,name){
 }
 $('#source-image').onclick=()=>{setSource('image','assets/'+$('#image-choice').value);$('#source-note').textContent=$('#image-choice').selectedOptions[0].textContent;};
 $('#image-choice').onchange=()=>$('#source-image').click();
-function setEmbedControls(disabled){
- document.querySelectorAll('aside select, aside input:not([type=file]), aside button, .effect, #compare, #copy').forEach(el=>el.disabled=disabled);if(!disabled){layerSignature='';renderLayers();syncHistory();}
-}
+
 $('#source-video').onclick=()=>setSource('video','assets/alpine-loop.webm');
 $('#video-play').onclick=()=>{if(!(media instanceof HTMLVideoElement))return;if(media.paused)media.play().catch(()=>{$('#status').textContent='Video playback failed.';});else media.pause();};
 $('#upload').onclick=()=>$('#file').click();

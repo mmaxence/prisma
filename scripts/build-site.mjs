@@ -2,7 +2,7 @@ import {cp,mkdir,writeFile,rm} from 'node:fs/promises';
 // Only public site assets, runtime source, and documentation enter the Pages artifact.
 await rm('site-dist',{recursive:true,force:true});
 await mkdir('site-dist',{recursive:true});
-for(const entry of ['demo','src','docs','documentation','README.md','LICENSE','ASSETS.md']){
+for(const entry of ['performance','demo','src','docs','documentation','README.md','LICENSE','ASSETS.md']){
  await cp(entry,`site-dist/${entry}`,{recursive:true,filter:path=>!/^demo\/[^/]+\.(jpg|png)$/.test(path)});
 }
 await writeFile('site-dist/.nojekyll','');

@@ -30,11 +30,15 @@
     "dev": "node scripts/serve.mjs",
     "test": "node scripts/check.mjs && node scripts/check.mjs reduced",
     "size": "node scripts/size.mjs",
-    "build:site": "node scripts/build-site.mjs"
+    "build:site": "node scripts/build-site.mjs",
+    "measure:size": "node scripts/measure-size.mjs"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/mmaxence/prisma.git"
   },
-  "homepage": "https://mmaxence.github.io/prisma/"
+  "homepage": "https://mmaxence.github.io/prisma/",
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
 }

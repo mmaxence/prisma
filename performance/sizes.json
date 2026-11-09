@@ -1,0 +1,28 @@
+{
+  "tool": "esbuild 0.28.2",
+  "target": "es2020",
+  "format": "esm",
+  "minified": true,
+  "units": "bytes",
+  "runtimeDependencies": 0,
+  "bundles": [
+    {
+      "name": "Film grain",
+      "bytes": 11244,
+      "gzip": 4925,
+      "brotli": 4386
+    },
+    {
+      "name": "Cinematic",
+      "bytes": 12101,
+      "gzip": 5260,
+      "brotli": 4672
+    },
+    {
+      "name": "All effects",
+      "bytes": 29135,
+      "gzip": 10616,
+      "brotli": 9358
+    }
+  ]
+}
