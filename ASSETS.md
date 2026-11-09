@@ -19,4 +19,4 @@ This review is limited to the files bundled in Prisma. It does not change licens
 
 ## Materia site effects
 
-`demo/vendor/materia/` contains the MIT-licensed title/wordmark effects and their transitive modules from [Materia](https://github.com/mmaxence/materia), copyright 2026 Maxence Mauduit. Its license is retained in that directory. `demo/materia-title.css` reproduces the corresponding hero and letter-plane styling; `demo/family.css` adapts the same public-site palette. These demo-only modules are not part of the media library package.
+`demo/vendor/materia/` contains the MIT-licensed wordmark effect and their transitive modules from [Materia](https://github.com/mmaxence/materia), copyright 2026 Maxence Mauduit. Its license is retained in that directory. `demo/materia-title.css` provides the original hero layout styling; `demo/family.css` adapts the same public-site palette. These demo-only modules are not part of the media library package.
