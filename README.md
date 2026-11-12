@@ -31,6 +31,10 @@ MIT, copyright 2026 Maxence Mauduit. See [LICENSE](LICENSE) and [asset notices](
 
 ## The family
 
-[Living Object](https://mmaxence.github.io/solids/) — interactive 3D. [Living Type](https://mmaxence.github.io/materia/) — living typography. [Living Frame](https://mmaxence.github.io/prisma/) — media in motion.
+[Living Object](https://mmaxence.github.io/solids/) — interactive 3D. [Living Type](https://mmaxence.github.io/materia/) — living typography. [Living Space](https://mmaxence.github.io/strata/) — spatial HTML interfaces.
 
 [Maxence Mauduit](https://mmaxence.me/)
+
+## Media failures
+
+A failed image/video resource restores native media visibility, sets `stats.fallback`, calls `onError` when provided, and emits the existing `prismaerror` event. A subsequent successful load recovers the effect. Preserve image alt text and provide video labels, controls/poster or adjacent fallback content; the renderer cannot repair an unavailable resource. For CORS/upload or shader failures, resolve the source/configuration issue and use `set(...)` or remount.

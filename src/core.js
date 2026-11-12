@@ -55,7 +55,7 @@ export function createEffect(media, options = {}) {
  const passthrough={name:'original',fragment:'vec4 effect(vec2 uv){return sampleMedia(uv);}'};
  let cache=new Map(),targets=[],targetSize='',previewLayer=null;
  let config = {...options}, gl, program, texture, uniforms, raf=0, disposed=false, failed=false, visible=true, paused=false;
- let impactProgress=0, phase=0, strength=0, target=0, last=0, dirty=true, uploaded=false, lastVideoTime=-1, sourceWidth=0, sourceHeight=0, textureUploads=0, sourceTextureAllocations=0, clickStart=-1, lost=false;
+ let impactProgress=0, phase=0, strength=0, target=0, last=0, dirty=true, uploaded=false, lastVideoTime=-1, sourceWidth=0, sourceHeight=0, textureUploads=0, sourceTextureAllocations=0, clickStart=-1, lost=false, mediaFailed=false;
  let impact=[0.5,0.5],pointer=[0.5,0.5], frames=0, cpuMs=0;
  const listeners=[];
  const on=(el,name,fn)=>{el.addEventListener(name,fn);listeners.push(()=>el.removeEventListener(name,fn));};
@@ -168,7 +168,17 @@ export function createEffect(media, options = {}) {
  on(window,'scroll',()=>{if(mode()==='scroll')wake();});
  on(document,'visibilitychange',()=>{last=0;if(document.hidden){cancelAnimationFrame(raf);raf=0;}else wake();});
  on(motion,'change',wake);
- on(media,video?'loadeddata':'load',()=>{uploaded=false;wake();});
+ on(media,video?'loadeddata':'load',()=>{
+  uploaded=false;
+  // A new valid resource can recover a load failure without recreating the
+  // controller. Shader/CORS errors still use the existing configuration path.
+  if(mediaFailed){
+   mediaFailed=false;
+   if(gl&&!lost)try{if(!texture)init();else makeProgram(layers()[0]?.effect||passthrough);failed=false;}catch(error){report(error);}
+  }
+  wake();
+ });
+ on(media,'error',()=>{mediaFailed=true;report(new Error('Media failed to load; native media retained'));});
  if(video)on(media,'seeked',()=>{uploaded=false;wake();});
  if(video)for(const event of ['play','pause','timeupdate'])on(media,event,wake);
  on(canvas,'webglcontextlost',e=>{e.preventDefault();lost=true;cancelAnimationFrame(raf);raf=0;canvas.style.opacity='0';media.style.opacity=previousOpacity;});
@@ -183,6 +193,6 @@ export function createEffect(media, options = {}) {
   set(next){if(disposed)return;validate({...config,...next});const old=config.effect,oldTrigger=config.trigger;config={...config,...next};if(next.trigger&&next.trigger!==oldTrigger){target=0;strength=0;clickStart=-1;}try{if(failed&&gl&&!lost){failed=false;uploaded=false;if(!texture)init();else makeProgram(layers()[0]?.effect||passthrough);}else if(next.effect&&next.effect!==old&&!config.layers&&!lost)makeProgram(next.effect);wake();}catch(error){report(error);}},
   pause(){paused=true;wake();},play(){paused=false;last=0;wake();},trigger,
   get stats(){return {frames,cpuMs,width:canvas.width,height:canvas.height,active:!!raf,fallback:failed||lost,programs:cache.size,intermediateTextures:targets.length,textureUploads,sourceTextureAllocations};},
-  destroy(){if(disposed)return;disposed=true;cancelAnimationFrame(raf);resize.disconnect();intersection.disconnect();listeners.forEach(fn=>fn());if(gl){gl.deleteTexture(texture);for(const item of cache.values())gl.deleteProgram(item.program);releaseTargets();cache.clear();}canvas.remove();media.style.opacity=previousOpacity;host.style.position=previousPosition;}
+  destroy(){if(disposed)return;disposed=true;cancelAnimationFrame(raf);raf=0;resize.disconnect();intersection.disconnect();listeners.forEach(fn=>fn());if(gl){gl.deleteTexture(texture);for(const item of cache.values())gl.deleteProgram(item.program);releaseTargets();cache.clear();}canvas.remove();media.style.opacity=previousOpacity;host.style.position=previousPosition;}
  };
 }

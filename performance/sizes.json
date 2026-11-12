@@ -8,21 +8,21 @@
   "bundles": [
     {
       "name": "Film grain",
-      "bytes": 11244,
-      "gzip": 4925,
-      "brotli": 4386
+      "bytes": 11412,
+      "gzip": 4983,
+      "brotli": 4439
     },
     {
       "name": "Cinematic",
-      "bytes": 12101,
-      "gzip": 5260,
-      "brotli": 4672
+      "bytes": 12269,
+      "gzip": 5316,
+      "brotli": 4711
     },
     {
       "name": "All effects",
-      "bytes": 29135,
-      "gzip": 10616,
-      "brotli": 9358
+      "bytes": 29303,
+      "gzip": 10673,
+      "brotli": 9391
     }
   ]
 }

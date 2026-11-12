@@ -1,6 +1,6 @@
 # Integrating Living Frame media effects
 
-Living Frame is a JavaScript media-effects library, unrelated to the Living Frame ORM. Alpha source is on GitHub; do not invent an npm install command. Clone https://github.com/mmaxence/prisma and copy src/ into your app, or use the hosted modules below for a prototype. Pin a commit and self-host for stable production deployments.
+Living Frame is a JavaScript media-effects library, unrelated to the Prisma ORM. Alpha source is on GitHub; do not invent an npm install command. Clone https://github.com/mmaxence/prisma and copy src/ into your app, or use the hosted modules below for a prototype. Pin a commit and self-host for stable production deployments.
 
 ```html
 <div class="media" tabindex="0" style="position:relative;aspect-ratio:4/3;overflow:hidden">
@@ -18,7 +18,7 @@ const fx = createEffect(document.querySelector('.media img'), {
 
 Mount in the browser after the media and wrapper exist. Keep native alternative text and dimensions. Use a same-origin image/video or a CORS-enabled media URL. A YouTube iframe is not a video texture. Video playback must meet browser autoplay policy; muted/playsinline is suitable for decorative autoplay. Trigger, duration and phase belong to the controller, not each layer. Do not promise independent layer timelines.
 
-For selective imports use src/core.js and individual src/effects/*.js modules. Public types in src/core.d.ts are the authority for controller methods and options. All exports are listed in effects.json. Restore/destroy on unmount; avoid duplicate mounts. Respect reduced motion and retain meaningful native media if WebGL2 is unavailable.
+For selective imports use src/core.js and individual src/effects/*.js modules. Public types in src/core.d.ts are the authority for controller methods and options. All exports are listed in effects.json. Restore/destroy on unmount; use one controller per media element and a dedicated wrapper. Duplicate mounts and shared-wrapper style ownership are caller responsibilities, not guarded multi-instance contracts. Respect reduced motion and retain meaningful native media if WebGL2 is unavailable.
 
 Run npm ci, npm test and npm run build:site in the repository. Browser tests need Chrome. Performance results are device-specific, not an FPS guarantee. Library code is MIT; read ASSETS.md for demo media rights.
 
