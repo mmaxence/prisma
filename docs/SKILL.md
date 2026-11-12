@@ -1,8 +1,8 @@
 ---
 name: prisma-effect
-description: Extend Prisma with a small, seamless media treatment for RGBA images and video.
+description: Extend Living Frame with a small, seamless media treatment for RGBA images and video.
 ---
-# Add a Prisma effect
+# Add a Living Frame effect
 
 Create `src/effects/<name>.js`, exporting a default object with `name`, `title`, `description`, and a GLSL ES 3.00 `fragment` string. Define `vec4 effect(vec2 uv)`. Do not define main or a version directive. Export it from `src/index.js`, declare its type in `src/index.d.ts`, and include it in `demo/app.js` and `test/browser.html`.
 

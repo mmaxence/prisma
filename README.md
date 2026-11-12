@@ -1,4 +1,7 @@
-# Prisma
+# Living Frame
+
+Part of **Living Things — Libraries for a living web**. Formerly **Prisma**. Existing repository URLs, package names, imports and APIs remain unchanged.
+
 
 Lightweight, composable effects for images and video. 25 treatments, five motion triggers, one WebGL2 renderer, and no runtime dependencies.
 
@@ -28,6 +31,6 @@ MIT, copyright 2026 Maxence Mauduit. See [LICENSE](LICENSE) and [asset notices](
 
 ## The family
 
-[Solids](https://mmaxence.github.io/solids/) — interactive 3D. [Materia](https://mmaxence.github.io/materia/) — living typography. [Prisma](https://mmaxence.github.io/prisma/) — media in motion.
+[Living Object](https://mmaxence.github.io/solids/) — interactive 3D. [Living Type](https://mmaxence.github.io/materia/) — living typography. [Living Frame](https://mmaxence.github.io/prisma/) — media in motion.
 
 [Maxence Mauduit](https://mmaxence.me/)

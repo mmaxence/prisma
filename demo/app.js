@@ -92,7 +92,7 @@ function setSource(kind,src,name){
  $('#image-choice').hidden=kind!=='image';
  const isVideo=kind==='video'||(kind==='upload'&&name.type.startsWith('video/'));
  const next=document.createElement(isVideo?'video':'img');next.id='media';
- const label=kind==='upload'?name.name:kind==='image'?$('#image-choice').selectedOptions[0].textContent:'Alpine lake — original Prisma sample';
+ const label=kind==='upload'?name.name:kind==='image'?$('#image-choice').selectedOptions[0].textContent:'Alpine lake — original Living Frame sample';
  if(isVideo){next.muted=true;next.loop=true;next.playsInline=true;next.preload='auto';next.setAttribute('aria-label',label);}else next.alt=label;
  next.src=src;media.replaceWith(next);media=next;
  document.querySelectorAll('[data-source]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.source===kind)));

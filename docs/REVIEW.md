@@ -2,7 +2,7 @@
 
 ## Scope
 
-Reviewed the Prisma renderer, demo state, composition editing, media lifecycle, accessibility, CSS, and package. Compared the local sibling sources under `lab/materia/public/type-lab` and `lab/solids/site/src` without modifying either sibling.
+Reviewed the Living Frame renderer, demo state, composition editing, media lifecycle, accessibility, CSS, and package. Compared the local sibling sources under `lab/materia/public/type-lab` and `lab/solids/site/src` without modifying either sibling.
 
 ## Resolved
 

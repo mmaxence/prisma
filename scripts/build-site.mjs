@@ -14,6 +14,6 @@ const catalog=await Promise.all(effects.map(async entry=>{const effect=(await im
 const escape=value=>String(value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
 const docs=await readFile('documentation/index.html','utf8');
 await writeFile('site-dist/documentation/index.html',docs.replace('<div id="effect-reference"></div>','<div id="effect-reference">'+catalog.map(effect=>`<article class="reference-card"><h3>${escape(effect.title)}</h3><code>${escape(effect.name)}</code><p>${escape(effect.description)}</p></article>`).join('')+'</div>').replace('<script type="module" src="reference.js"></script>',''));
-await writeFile('site-dist/effects.json',JSON.stringify({name:'Prisma',version:'0.1.0-alpha.1',effects:catalog},null,2)+'\n');
+await writeFile('site-dist/effects.json',JSON.stringify({name:'Living Frame',alternateName:'Prisma',version:'0.1.0-alpha.1',effects:catalog},null,2)+'\n');
 
 console.log('Built GitHub Pages site in site-dist/');

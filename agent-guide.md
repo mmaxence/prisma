@@ -1,6 +1,6 @@
-# Integrating Prisma media effects
+# Integrating Living Frame media effects
 
-Prisma is a JavaScript media-effects library, unrelated to the Prisma ORM. Alpha source is on GitHub; do not invent an npm install command. Clone https://github.com/mmaxence/prisma and copy src/ into your app, or use the hosted modules below for a prototype. Pin a commit and self-host for stable production deployments.
+Living Frame is a JavaScript media-effects library, unrelated to the Living Frame ORM. Alpha source is on GitHub; do not invent an npm install command. Clone https://github.com/mmaxence/prisma and copy src/ into your app, or use the hosted modules below for a prototype. Pin a commit and self-host for stable production deployments.
 
 ```html
 <div class="media" tabindex="0" style="position:relative;aspect-ratio:4/3;overflow:hidden">
@@ -22,4 +22,4 @@ For selective imports use src/core.js and individual src/effects/*.js modules. P
 
 Run npm ci, npm test and npm run build:site in the repository. Browser tests need Chrome. Performance results are device-specific, not an FPS guarantee. Library code is MIT; read ASSETS.md for demo media rights.
 
-Related products: [Solids](https://mmaxence.github.io/solids/) for 3D objects and [Materia](https://mmaxence.github.io/materia/) for text effects.
+Related products: [Living Object](https://mmaxence.github.io/solids/) for 3D objects and [Living Type](https://mmaxence.github.io/materia/) for text effects.
