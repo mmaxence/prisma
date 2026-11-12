@@ -33,7 +33,8 @@
     "build:site": "node scripts/build-site.mjs",
     "measure:size": "node scripts/measure-size.mjs",
     "check:docs": "node scripts/check-docs.mjs",
-    "check:examples": "node scripts/check-examples.mjs"
+    "check:examples": "node scripts/check-examples.mjs",
+    "check:recipes": "node scripts/check-recipes.mjs"
   },
   "repository": {
     "type": "git",

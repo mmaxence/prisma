@@ -24,3 +24,7 @@ This review is limited to the files bundled in Prisma. It does not change licens
 ## Self-contained integration example
 
 `examples/media/pattern.svg` is an original vector illustration authored for this project and included under its MIT license. `examples/media/motion.webm` is a byte-identical copy of the existing `test/motion.webm` synthetic FFmpeg testsrc2 fixture described above; it adds no third-party footage or soundtrack and grants no new rights to generator tools. The example uses system fonts and no external media. Neither file enters the runtime package. Original demo/test media and notices are unchanged.
+
+## Practical recipe collection
+
+`examples/recipes/product.svg` and `portrait.svg` are original geometric vector illustrations authored for this project under its MIT license. The portrait is stylized artwork, not photography or a likeness claim. Recipes reuse the unchanged `examples/media/pattern.svg` and byte-identical synthetic `examples/media/motion.webm` described above; no new video, external font/media or rights decision. `examples/recipes/vendor/space/` is an unmodified example-only Living Space source snapshot (4ecc9e5, runtime 6e9e052), with its MIT license retained. All example media and this fixture are excluded from the Frame runtime package. Existing asset files/notices and licenses remain intact.

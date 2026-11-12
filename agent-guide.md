@@ -52,3 +52,7 @@ Check the actual images/video codec, replacement failure, CORS and context resto
 Repository: npm test, npm run measure:size, npm run check:docs, npm run check:examples, npm run build:site. Chrome is required for browser checks; set CHROME. Preserve MIT and ASSETS notices; do not assume other products' images inherit runtime-code rights. Local docs are not live publication.
 
 Related: [Living Type](https://mmaxence.github.io/materia/) · [Living Object](https://mmaxence.github.io/solids/) · [Living Space](https://mmaxence.github.io/strata/). Independent controllers do not automatically compose.
+
+## Practical recipe collection (local candidate)
+
+[Eight recipes](docs/recipes.md) · [Runnable gallery](examples/recipes/index.html). Use cases: product hero, editorial image, video cover, gallery card, accessible before/after, illustrated portrait, opt-in ambient video and media in real flat Space panels. One active Frame child, generation guards, native captions/keyboard controls, source/error/resize/context updates and explicit source-video intent. Phase pause is not source pause; original mode can keep an explicitly played native video playing. Reduced preference uses original stills. Space is an independently licensed pinned example fixture outside the Frame package; no projected/device qualification. Original vector/synthetic media only, no new external assets/services or registry/live-release claim. Run check:recipes after build:site.

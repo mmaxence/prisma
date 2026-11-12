@@ -58,6 +58,23 @@ Root `@prisma-fx/media` exposes createEffect and all 25 named effects; `/core` p
 
 Use **one controller per media element and a dedicated wrapper**. Duplicate mounts/shared style ownership are not guarded/reference counted. The controller owns the decorative canvas, source opacity and temporary wrapper position. Keep controls outside that wrapper, do not concurrently write those owned styles, and destroy before removing/reparenting nodes. Replacing the media element/wrapper requires remounting; source URLs and settings can update in place. Images may mount before load; native source remains until usable data exists.
 
+## Eight practical use cases
+
+[Run the recipe gallery](examples/recipes/index.html) from source or the local built site; [the choice/ownership guide](docs/recipes.md) documents all eight presets and limits. They are application recipes, not effect aliases or new APIs.
+
+| Use case | Restrained default | Meaning stays native |
+| --- | --- | --- |
+| Product hero | zoomIn .2, still | Original vector product illustration, caption/selection |
+| Editorial image | halftone .2, still | Article, alt and figure caption |
+| Video cover | duotone .18, still | Cover and explicitly played synthetic source video |
+| Gallery card | duotone .12, hover | Actual link/disclosure; keyboard navigation |
+| Before/after | duotone .55, still | Labelled original/treated views; native view buttons |
+| Portrait treatment | duotone .3, still | Original vector portrait; no photography claim |
+| Ambient media | pan .12, loop only after Play | Initial still, source play/pause intent |
+| Media in spatial panels | zoomIn .12, still | Real flat Space layout and native note input |
+
+One active Frame controller, consistent amount/detail/trigger options and explicit reverse-order cleanup. Original view removes effects; source-video pause is a separate action. Reduced preference chooses native stills and pauses owned video. Async generations and media-event ownership protect user intent on replacement, visibility and teardown. A pinned MIT Space fixture is example-only, not a Frame dependency or projected/device composition certification. Examples/media are excluded from the tarball; this choice guide is included. Local copies are not live documentation parity. Run npm run check:recipes after building.
+
 ## Layers, options and timing
 
 Layers apply in array order, each sampling the previous result. `layers` takes precedence over `effect`. Update through set({layers:...}); mutating a layer object alone is not the update contract. An empty layer array displays passthrough but still owns a canvas/context and can update a playing video. The playground's six-layer limit is UI policy, **not a runtime maximum**. No independent per-layer triggers, phases or timelines.
@@ -125,6 +142,7 @@ npm test
 npm run measure:size
 npm run check:docs
 npm run check:examples # requires Chrome; set CHROME to your executable
+npm run check:recipes  # eight practical local source/built/installed cases
 npm run build:site
 ```
 

@@ -15,3 +15,6 @@ Version 0.1.0-alpha.1. MIT library; sample assets have separate notices. Not pub
 - [Performance](https://mmaxence.github.io/prisma/performance/index.html): measurements, method and caveats.
 - [Asset notices](https://mmaxence.github.io/prisma/ASSETS.md): media rights and attribution.
 - [Source](https://github.com/mmaxence/prisma): releases, development and issue reporting.
+
+- [Eight practical recipes](docs/recipes.md): local choice/ownership guide for native media, video intent, comparison, context and flat spatial examples; not live publication evidence.
+- [Runnable recipe gallery](examples/recipes/index.html): eight cases, original local vector/synthetic media, native controls and cleanup.
