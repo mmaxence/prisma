@@ -20,3 +20,7 @@ This review is limited to the files bundled in Prisma. It does not change licens
 ## Materia site effects
 
 `demo/vendor/materia/` contains the MIT-licensed wordmark effect and their transitive modules from [Materia](https://github.com/mmaxence/materia), copyright 2026 Maxence Mauduit. Its license is retained in that directory. `demo/materia-title.css` provides the original hero layout styling; `demo/family.css` adapts the same public-site palette. These demo-only modules are not part of the media library package.
+
+## Self-contained integration example
+
+`examples/media/pattern.svg` is an original vector illustration authored for this project and included under its MIT license. `examples/media/motion.webm` is a byte-identical copy of the existing `test/motion.webm` synthetic FFmpeg testsrc2 fixture described above; it adds no third-party footage or soundtrack and grants no new rights to generator tools. The example uses system fonts and no external media. Neither file enters the runtime package. Original demo/test media and notices are unchanged.

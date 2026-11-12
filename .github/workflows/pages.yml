@@ -27,6 +27,10 @@ jobs:
         env:
           CHROME: google-chrome
       - run: npm run build:site
+      - run: npm run check:docs
+      - run: npm run check:examples
+        env:
+          CHROME: google-chrome
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

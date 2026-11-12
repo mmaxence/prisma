@@ -1,11 +1,12 @@
 # Living Frame
 
-> Dependency-free WebGL2 effects for native images and videos. This is the media-effects project by Maxence Mauduit, not the Living Frame database ORM.
+> Dependency-free WebGL2 effects for native images and videos. This is the media-effects project by Maxence Mauduit, not the Prisma database ORM.
 
-Version 0.1.0-alpha.1. MIT library; sample assets have separate notices. Not published to npm. Use source ES modules; pin a commit and self-host for production. Browser mounting requires WebGL2; retain native media as fallback.
+Version 0.1.0-alpha.1. MIT library; sample assets have separate notices. Not published to npm. Use source ES modules; pin a commit and self-host for production. Browser enhancement requires WebGL2; unavailable enhancement retains native media. Effect pause/reduced motion do not pause source video.
 
 ## Start here
 - [Integration guide](https://mmaxence.github.io/prisma/agent-guide.md): installation, working example, lifecycle and constraints.
+- [Runnable media example](https://mmaxence.github.io/prisma/examples/media/index.html): image/video layers, separate effect/playback controls and native failure/recovery; available after the corresponding local candidate is published.
 - [Documentation](https://mmaxence.github.io/prisma/documentation/index.html): full API, effects, triggers and accessibility.
 - [Effect catalog JSON](https://mmaxence.github.io/prisma/effects.json): exported names and module URLs generated from source exports.
 - [TypeScript API](https://mmaxence.github.io/prisma/src/index.d.ts): public type declarations.

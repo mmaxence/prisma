@@ -31,7 +31,9 @@
     "test": "node scripts/check.mjs && node scripts/check.mjs reduced",
     "size": "node scripts/size.mjs",
     "build:site": "node scripts/build-site.mjs",
-    "measure:size": "node scripts/measure-size.mjs"
+    "measure:size": "node scripts/measure-size.mjs",
+    "check:docs": "node scripts/check-docs.mjs",
+    "check:examples": "node scripts/check-examples.mjs"
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,7 @@
   },
   "homepage": "https://mmaxence.github.io/prisma/",
   "devDependencies": {
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
   }
 }
